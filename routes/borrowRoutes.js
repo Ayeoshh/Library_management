@@ -1,14 +1,16 @@
 const express = require('express');
-const borrowController = require('../controllers/borrowController');
+const db = require('../config/dbConfig');
+const BorrowController = require('../controllers/borrowController');
 
-module.exports = (db) =>{
-    const router = express.router();
+module.exports = () =>{
+    const router = express.Router();
+    const borrowController = new BorrowController(db);
 
-    router.get('/borrow', (req, res) =>{borrowController.getAllBorrow(req, res, db);});
-    router.get('/borrow/:id', (req, res)=>{borrowController.getBorrowById(req, res, db);});
-    router.post('/borrow', (req, res)=> {borrowController.createBorrow(req, res, db);});
-    router.put('/borrow/:id', (req, res)=>{borrowController.updateBorrow(req, res, db);});
-    router.delete('/borrow/:id', (req, res)=>{borrowController.deleteBorrow(req, res, db);});
+    router.get('/borrow', borrowController.getAllBorrow);
+    router.get('/borrow/:id', borrowController.getBorrowById);
+    router.post('/borrow', borrowController.createBorrow);
+    router.put('/borrow/:id', borrowController.updateBorrow);
+    router.delete('/borrow/:id', borrowController.deleteBorrow);
 
     return router;
 }

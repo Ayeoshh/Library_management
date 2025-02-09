@@ -1,76 +1,58 @@
-// get all borrows
-const getAllBorrow = (req, res, db)=>{
-    const sql = 'SELECT * FROM borrows';
-    db.query(sql, (err, results)=>{
-        if(err){
-            console.log('Error fetching borrows: ', err.message);
-            return res.status(500).json({message: 'Error fetching borrows'});
-        }
-        res.status(200).json(results);
-    });
-};
-// get borrow by id
-const getBorrowById = (req, res, db)=>{
-    const {id} = req.params;
-    const sql = 'SELECT * FROM borrows WHERE id = ?';
-    db.query(sql, [id], (err, results)=>{
-        if(err){
-            console.log('Error fetching borrow:', err.message);
-            return res.status(500).json({message: 'Error fetching borrow'});
-        }
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Borrow not found' });
-        }
-        res.status(200).json(results[0]);
-    });
-};
-// create a borrow 
-const createBorrow = (req, res, db)=>{
-    const {user_id, book_id, borrow_date, return_date} = req.body;
-    const sql = 'INSERT INTO borrows (user_id, book_id, borrow_date, return_date) VALUES (?, ?, ?, ?)';
-    db.query(sql, [user_id, book_id, borrow_date, return_date], (err, results)=>{
-        if(err){
-            console.log('Error creating borrow', err.message);
-            return res.status(500).json({message: 'Error creating borrow'});
-        }
-        res.status(201).json({message: 'Borrow created successfully'});
-    });
-};
-// update a borrow by id
-const updateBorrow = (req, res, db)=>{
-    const {id} = req.params;
-    const {user_id, book_id, borrow_date, return_date} = req.body;
-    const sql = 'UPDATE borrows SET user_id = ?, book_id = ?, borrow_date = ?, return_date = ? WHERE id = ?';
-    db.query(sql, [user_id, book_id, borrow_date, return_date, id], (err, results)=>{
-        if(err){
-            console.log('Error updating borrow', err.message);
-        }
-        if (results.affectedRows === 0) {
-            return res.status(404).json({ message: 'Borrow not found' });
-        }
-        res.status(200).json({message: 'Borrow updated successfully'});
-    });
-};
-// delete a borrow by id
-const deleteBorrow = (req, res, db)=>{
-    const {id} = req.params.id;
-    const sql = 'DELETE FROM borrows WHERE id = ?';
-    db.query(sql, [id], (err, results)=>{
-        if(err){
-            console.log('Error deleting borrow', err.message);
-            return res.status(500).json({message: 'Error deleting borrow'});
-        }
-        if (results.affectedRows === 0) {
-            return res.status(404).json({ message: 'Borrow not found' });
-        }
-        res.status(200).json({message: 'Borrow deleted successfully'});
-    });
-};
+const BorrowService = require('../services/borrowService');
 
-module.exports ={
-    getAllBorrow,
-    getBorrowById,
-    createBorrow,
-    updateBorrow,
-    deleteBorrow
-};
+class BorrowController{
+    constructor(db){
+        this.borrowService = new BorrowService(db);
+    }
+
+    getAllBorrows = async (req, res)=>{
+        try {
+            const borrows = await this.borrowService.getAllBorrows();
+            res.status(200).json(borrows);
+        }catch(error){
+            res.status(500).json({message: error.message});
+        }
+    }
+
+    getBorrowById = async (req, res)=>{
+        try {
+            const {id} = req.params;
+            const borrow = await this.borrowService.getBorrowById(id);
+            res.status(200).json(borrow);
+        } catch (error){
+            res.status(404).json({message: error.message});
+        }
+    }
+
+    createBorrow = async (req, res)=>{
+        try{
+            const {user_id, borrow_id, borrow_date, return_date} = req.body;
+            const borrowcreate = await this.borrowService.createBorrow(user_id, borrow_id, borrow_date, return_date);
+            res.status(201).json({message: 'borrow created successfully', borrow: borrowcreate});
+        }catch (error){
+            res.status(400).json({message: error.message});
+        }
+    }
+    updateBorrow = async (req, res)=>{
+        try{
+            const {id} = req.params;
+            const {user_id, borrow_id, borrow_date, return_date} = req.body;
+            const borrowupdate = await this.borrowService.createBorrow(id, user_id, borrow_id, borrow_date, return_date);
+            res.status(201).json({message: 'borrow updated successfully', borrow: borrowupdate});
+        }catch (error){
+            res.status(400).json({message: error.message});
+        }
+    }
+
+    deleteBorrow = async (req, res)=>{
+        try{
+            const {id} = req.params;
+            const borrowdelete = await this.borrowService.deleteBorrow(id);
+            res.status(200).json({message: 'borrow deleted successfull', borrow: borrowdelete});
+        }catch (error){
+            res.status(500).json({message: error.message});
+        }
+    }
+}
+
+module.exports = BorrowController; 

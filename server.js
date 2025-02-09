@@ -17,6 +17,7 @@ const port = 3000
 // database connection
 const db = require('./config/dbConfig');
 
+
 // define all the routes
 const userRoutes = require('./routes/userRoutes'); 
 const bookRoutes = require('./routes/bookRoutes');
@@ -24,10 +25,10 @@ const borrowRoutes = require('./routes/borrowRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 //use of routes
-app.use('/api/auth', authRoutes(db)); // check here why db is passed
-app.use('/api/users', userRoutes(db));   // check here why db is passed
-app.use('/api/books', bookRoutes(db)); // check here why db is passed
-app.use('/api/borrows', borrowRoutes(db)); // check here why db is passed
+app.use('/api/auth', authRoutes); // check here why db is passed
+app.use('/api/users', userRoutes);   // check here why db is passed
+app.use('/api/books', bookRoutes); // check here why db is passed
+app.use('/api/borrows', borrowRoutes); // check here why db is passed
 
 
 // handle undefined routes

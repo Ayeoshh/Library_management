@@ -1,77 +1,63 @@
-// get all books
-const getAllBooks = (req, res, db)=>{
-    const sql = 'SELECT * FROM books';
-    db.query(sql, (err, results)=>{
-        if(err){
-            console.log('Error fetching books', err.message);
-            return res.status(500).json({message : err.message});
+const BookService = require('../services/bookService');
+
+class BookController{
+    constructor(db){
+        this.bookService = new BookService(db);
+    }
+
+    getAllBooks = async (req, res)=>{
+        try {
+            const books = await this.bookService.getAllBook();
+            res.json(books);
+        } catch (error){
+            res.status(500).json({message: err.message});
         }
-        res.status(200).json(results);
-    });
-};
-// get book by id
-const getBookById = (req, res, db) =>{
-    const {id} = req.params;
-    const sql = 'SELECT * FROM books WHERE id = ?';
-    db.query(sql, [id], (err, results)=>{
-        if(err){
-            console.log('Error fetching book', err.message);
-            return res.status(500).json({message: err.message});
+    };
+
+    getBookById = async (req, res)=>{
+        try{
+            const {id} = req.params;
+            const book = await this.bookService.getBookById(id);
+            res.json(book);
+        }catch (error){
+            res.status(404).json({message: error.message});
         }
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Book not found' });
+    };
+    
+    // add the part is the book is already present
+    createBook = async (req, res)=>{
+        try{
+            const {title, author, genre, published_year, available} = req.body;
+            const newBook = await this.bookService.createBook(title, author, genre, published_year, available);
+            res.status(201).json({message: 'Book created successfully', book : newBook});
+        } catch (error){
+            res.status(500).json({message: error.message});
         }
-        res.status(200).json(results[0]);
-    });
-};
-// create new book
-const createBook = (req, res, db) =>{
-    const {title, author, genre, published_year, available} = req.body;
-    const sql = 'INSERT INTO books (title, author, genre, published_year, available) VALUES (?, ?, ?, ?, ?)';
-    db.query(sql, [title, author, genre, published_year, available], (err, results)=>{
-        if(err){
-            console.log('Error creating book', err.message);
-            return res.status(500).json({message: err.message});
+    };
+    // here also add the part is the book is already present
+    updateBook = async (req, res)=>{
+        try{
+            const {id} = req.params;
+            const {title, author, genre, published_year, available} = req.body;
+            const updatedBook = await this.bookService.updateBook(id, title, author, genre, published_year, available);
+            res.status(200).json(updatedBook);
+
+        }catch (error){
+            res.status(404).json({message: error.message});
         }
-        res.status(201).json({message: 'Book created successfully'});
-    });
-};
-// update book by id
-const updateBook = (req, res, db)=>{
-    const {id} = req.params;
-    const {title, author, genre, published_year, available} = req.body;
-    const sql = 'UPDATE books SET title = ? , author = ?, genre = ?, published_year = ?, available = ? WHERE id =?';
-    db.query(sql, [title, author, genre, published_year, available, id], (err, results)=>{
-        if(err){
-            console.log('Error updating book', err.message)
-            return res.status(500).json({message: err.message});
+    }
+
+    deleteBook = async (req, res) =>{
+        try{
+            const {id} = req.params;
+            const deletedBook = await this.bookService.deleteBook(id);
+            res.status(200).json(deletedBook);
+        }catch (error){
+            res.status(404).json({message: error.message});
         }
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Book not found' });
-        }
-        res.status(200).json({message: 'Book updated successfully'});
-    });
-};
-// delete book by id
-const deleteBook  = (req, res, db)=>{
-    const {id} = req.params;
-    const sql = 'DELETE FROM books WHERE id=?';
-    db.query(sql, [id], (err, results)=>{
-        if(err){
-            console.log('Error deleting book', err.message);
-            return res.status(500).json({message: err.message});
-        }
-        if (results.affectedRows === 0) {
-            return res.status(404).json({ message: 'Book not found' });
-        }
-        res.status(200).json({message: 'Book deleted successfully'});
-    })
+    };
+
+
 }
 
-module.exports = {
-    getAllBooks,
-    getBookById,
-    createBook,
-    updateBook,
-    deleteBook
-};
+module.exports = BookController;
