@@ -5,6 +5,7 @@ class UserRepository{
         this.db = db;
     }
     async getAllUsers(){
+    
         const sql = 'SELECT * FROM users';
         return new Promise((resolve, reject)=>{
             this.db.query(sql, (err, results)=>{

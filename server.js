@@ -25,10 +25,16 @@ const borrowRoutes = require('./routes/borrowRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 //use of routes
-app.use('/api/auth', authRoutes); // check here why db is passed
-app.use('/api/users', userRoutes);   // check here why db is passed
-app.use('/api/books', bookRoutes); // check here why db is passed
-app.use('/api/borrows', borrowRoutes); // check here why db is passed
+app.use('/api/auth', authRoutes); 
+app.use('/api/users', userRoutes());   
+app.use('/api/books', bookRoutes()); 
+app.use('/api/borrows', borrowRoutes()); 
+
+
+// server is running check up
+app.get("/test", (req, res) => {
+    res.send("Server is working!");
+});
 
 
 // handle undefined routes

@@ -2,15 +2,18 @@ const BookService = require('../services/bookService');
 
 class BookController{
     constructor(db){
+       
         this.bookService = new BookService(db);
+        
     }
 
     getAllBooks = async (req, res)=>{
+      
         try {
-            const books = await this.bookService.getAllBook();
+            const books = await this.bookService.getAllBooks();
             res.json(books);
         } catch (error){
-            res.status(500).json({message: err.message});
+            res.status(500).json({message: error.message});
         }
     };
 

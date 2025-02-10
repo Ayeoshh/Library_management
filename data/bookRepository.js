@@ -4,6 +4,7 @@ class BookRepository{
     }
 
     async getAllBooks(){
+        
         const sql = 'SELECT * FROM books';
         return new Promise((resolve, reject)=>{
             this.db.query(sql, (err, results)=>{
@@ -15,7 +16,7 @@ class BookRepository{
         });
     }
 
-    async getBookById(id){
+    async getBookById(id){  
         const sql = 'SELECT * FROM books WHERE id = ?';
         return new Promise((resolve, reject)=>{
             this.db.query(sql, [id], (err, results)=>{

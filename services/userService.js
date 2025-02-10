@@ -6,6 +6,7 @@ class UserService{
     }
 
     async getAllUsers(){
+       
         return await this.userRepository.getAllUsers();
     }
 
