@@ -2,10 +2,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const UserRepository = require('../data/userRepository');
 const dotenv = require('dotenv');
+const db = require('../config/dbConfig'); // Ensure db is correctly imported
+const userRepository = new UserRepository(db);
 
 dotenv.config();
 
 class AuthServices{
+    // constructor(db){
+    //     this.userRepository = new UserRepository(db);
+    // }
     static generateToken(user){
         return jwt.sign(
             { id: user.id, email: user.email},
@@ -15,22 +20,24 @@ class AuthServices{
     }
 
     static async registerUser(name, email, password){
+        console.log(("in register***********"))
+        console.log(name, email, password);
         // check if the user exists
-        let user = await UserRepository.findByEmail(email);
+        let user = await userRepository.findUserByEmail(email);
         if(user){
             throw new Error('User already exists');
         }
-
+       
         // hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         //create user
-        user = await UserRepository.createUser({name, email, password: hashedPassword});
+        user = await userRepository.createUser(name, email, hashedPassword);
 
         return {message: 'User created successfully'};
     }
     static async loginUser(email, password){
-        const user = await UserRepository.findByEmail(email);
+        const user = await userRepository.findUserByEmail(email);
         if(!user){
             throw new Error('Invalid credentials');
         }

@@ -1,6 +1,8 @@
-const { validationResult} = require('express-validators');
+const { validationResult} = require('express-validator');
 const AuthService = require('../services/authServices');
 const dotenv = require('dotenv');
+// const db = require('../config/dbConfig');
+// const authService = new AuthService(db);
 
 dotenv.config();
 
@@ -12,7 +14,7 @@ exports.register = async(req, res)=>{
     }
     try{
         const{name, email, password} = req.body;
-
+        console.log("incontroller *************")
         const response = await AuthService.registerUser(name, email, password);
 
         res.status(201).json(response);

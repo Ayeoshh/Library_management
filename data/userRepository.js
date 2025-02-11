@@ -29,34 +29,86 @@ class UserRepository{
         });
     }
 
-    async findUserById(email){
-        const sql = 'SELECT * FROM users WHERE email = ?';
-        return new Promise((resolve, reject)=>{
-            this.db.query(sql, [email], (err, results)=>{
-                if(err){
+    async findUserByEmail(email) {
+        const sql = 'SELECT * FROM users WHERE email = $1'; // Fix for PostgreSQL
+        return new Promise((resolve, reject) => {
+            this.db.query(sql, [email], (err, results) => {
+                if (err) {
                     return reject(err);
                 }
-                resolve(results.length>0 ? results[0] : null );
+                resolve(results.rows.length > 0 ? results.rows[0] : null);
             });
         });
     }
+    
+    // async findUserByEmail(email){
+    //     const sql = 'SELECT * FROM users WHERE email = ?';
+    //     return new Promise((resolve, reject)=>{
+    //         this.db.query(sql, [email], (err, results)=>{
+    //             if(err){
+    //                 return reject(err);
+    //             }
+    //             resolve(results.length>0 ? results[0] : null );
+    //         });
+    //     });
+    // }
 
-    async createUser(name , email, password){
+    async createUser(name, email, password) {
+        console.log("In createUser********");
+        console.log("Received parameters:", { name, email, password });
+    
+        if (!name || !email || !password) {
+            throw new Error("Missing required fields: name, email, or password");
+        }
+    
         const existingUser = await this.findUserByEmail(email);
         if (existingUser) {
             throw new Error("User with this email already exists");
         }
-        const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+    
+        console.log("Proceeding with user creation...");
+        
         const hashedPassword = await bcrypt.hash(password, 10);
-        return new Promise((resolve, reject)=>{
-            this.db.query(sql, [name, email, hashedPassword], (err, results)=>{
-                if(err){
-                    reject(err);
+        console.log("Hashed Password:", hashedPassword);
+    
+        // Use the correct placeholder syntax based on your database:
+        const sql = 'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *';  // Use $1, $2, $3 for PostgreSQL
+    
+        return new Promise((resolve, reject) => {
+            this.db.query(sql, [name, email, hashedPassword], (err, results) => {
+                if (err) {
+                    console.error("Database Insert Error:", err);
+                    return reject(err);
                 }
-                resolve(results);
+                console.log("User Created Successfully:", results.rows);
+                resolve(results.rows[0]); // PostgreSQL returns results inside `rows`
             });
         });
     }
+    
+
+    // async createUser(name , email, password){
+    //     console.log("in createuser********")
+    //     const existingUser = await this.findUserByEmail(email);
+    //     if (existingUser) {
+    //         throw new Error("User with this email already exists");
+    //     }
+    //     console.log("TEST***************************")
+    //     // const sql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
+    //     const sql = 'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *';
+       
+    //     const hashedPassword = await bcrypt.hash(password, 10);
+       
+    //     return new Promise((resolve, reject)=>{
+    //         this.db.query(sql, [name, email, hashedPassword], (err, results)=>{
+    //             console.log("testtttttttt after query")
+    //             if(err){
+    //                 reject(err);
+    //             }
+    //             resolve(results);
+    //         });
+    //     });
+    // }
 
     async updateUser(id, name, email, password){
         const sql = 'UPDATE users SET name = ? , email = ?';

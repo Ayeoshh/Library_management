@@ -6,7 +6,7 @@ const registerSchema = {
         password: {type: 'string', minLength: 6}
     },
     required: ['name', 'email', 'password'],
-    addtionalProperties: false
+    additionalProperties: false
 };
 
 module.exports =  {registerSchema};

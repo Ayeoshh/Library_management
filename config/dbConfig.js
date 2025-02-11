@@ -20,3 +20,17 @@ pool.connect()
     });
 
 module.exports = pool;
+
+// which is better?
+// async function connectToDatabase(pool) {
+//     try {
+//         await pool.connect();
+//         console.log("Connected to PostgreSQL database");
+//     } catch (err) {
+//         console.error("Unable to connect to the database:", err.message);
+//         process.exit(1);
+//     }
+// }
+
+// // Call the function with your pool instance
+// connectToDatabase(pool);

@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes)=>{
         },
         password: {type: DataTypes.STRING, allowNull: false},
         role: {type: DataTypes.ENUM('admin', 'member'), defaultValue: 'member'},
-        membership_date: {type: DataTypes.INTEGER, allowNull: false},
+        membership_date: {type: DataTypes.INTEGER, allowNull: true},
         hooks: {
             beforeCreate: async (user)=>{
                 const salt = await bcrypt.genSalt(10);
